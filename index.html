@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spotify Playlist Downloader</title>
+</head>
+<body>
+  <h2>Paste your Spotify playlist or track link</h2>
+  <form method="POST">
+    <input type="text" name="playlist" placeholder="https://spotify.link/..." required>
+    <button type="submit">Download</button>
+  </form>
+
+  <form action="/clear">
+    <button type="submit">🧹 Clear Old Downloads</button>
+  </form>
+
+  <div id="progress"></div>
+
+  <script>
+    const form = document.querySelector("form");
+    const progress = document.getElementById("progress");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      progress.innerHTML = "<pre>⏳ Starting download...\n</pre>";
+      const response = await fetch("/", {
+        method: "POST",
+        body: new FormData(form)
+      });
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value);
+        progress.innerHTML = text;
+      }
+    });
+  </script>
+</body>
+</html>
